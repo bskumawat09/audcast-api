@@ -8,6 +8,7 @@ class OtpService {
 	}
 
 	sendBySms(number, otp) {
+		// send OTP using some 3rd party service
 		console.log(`OTP (${otp}) sent to ${number}`);
 	}
 

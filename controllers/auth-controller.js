@@ -16,21 +16,23 @@ class AuthController {
 
 		const otp = await otpService.generateOtp();
 		const validity = 5 * 60 * 1000; // 5 minutes
-		const expires = Date.now() + validity;
+		const expires = Date.now() + validity; // curr_time + 5 minutes
 		const data = `${phone}.${otp}.${expires}`;
 
 		const hash = hashService.hashOtp(data);
 
 		try {
 			await otpService.sendBySms(phone, otp);
+
 			res.json({
 				hash: `${hash}.${expires}`,
 				phone,
 			});
 		} catch (err) {
 			console.log("ERR", err);
+
 			res.status(500).json({
-				message: "message sending failed",
+				message: "could not send OTP",
 			});
 		}
 	}
@@ -44,6 +46,7 @@ class AuthController {
 			});
 		}
 
+		// check the OTP
 		const [hashedOtp, expires] = hash.split(".");
 
 		if (Date.now() > +expires) {
@@ -61,6 +64,7 @@ class AuthController {
 			});
 		}
 
+		// login the user or register new user
 		let user;
 
 		try {
@@ -75,14 +79,10 @@ class AuthController {
 			});
 		}
 
-		const { accessToken, refreshToken } = tokenService.generateToken({
+		// generate jwt tokens and set as cookie
+		const accessToken = tokenService.generateToken({
 			id: user._id,
-			activated: false,
-		});
-
-		res.cookie("refreshtoken", refreshToken, {
-			maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
-			httpOnly: true,
+			activated: user.activated,
 		});
 
 		res.cookie("accesstoken", accessToken, {
@@ -94,6 +94,17 @@ class AuthController {
 
 		res.json({
 			user: userDto,
+			auth: true,
+		});
+	}
+
+	logout(req, res) {
+		// delete token from cookies
+		res.clearCookie("accessToken");
+
+		res.json({
+			user: null,
+			auth: false,
 		});
 	}
 }
