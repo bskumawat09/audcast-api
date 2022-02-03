@@ -14,6 +14,10 @@ class TokenService {
 
 		return { accessToken, refreshToken };
 	}
+
+	async verifyAccessToken(token) {
+		return jwt.verify(token, accessTokenSecret);
+	}
 }
 
 module.exports = new TokenService();
