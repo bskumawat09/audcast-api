@@ -8,7 +8,8 @@ class ActivateController {
 		const { name, avatar } = req.body;
 
 		if (!name || !avatar) {
-			res.status(400).json({
+			return res.status(400).json({
+				status: "error",
 				message: "all fields are required"
 			});
 		}
@@ -29,17 +30,19 @@ class ActivateController {
 				.resize(150, Jimp.AUTO)
 				.write(path.resolve(__dirname, `../storage/${imagePath}`));
 		} catch (err) {
-			res.status(500).json({
-				message: "could not process image"
+			return res.status(500).json({
+				status: "error",
+				message: err.message
 			});
 		}
 
-		const userId = req.user.id;
 		// update user
+		const userId = req.user.id;
 		try {
 			const user = await userService.findUser({ _id: userId });
 			if (!user) {
 				return res.status(404).json({
+					status: "error",
 					message: "user not found"
 				});
 			}
@@ -50,11 +53,13 @@ class ActivateController {
 			await user.save();
 
 			res.json({
+				status: "success",
 				user: new UserDto(user),
 				auth: true
 			});
 		} catch (err) {
 			res.status(500).json({
+				status: "error",
 				message: "something went wrong"
 			});
 		}

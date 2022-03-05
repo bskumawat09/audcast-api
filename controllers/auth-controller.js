@@ -10,6 +10,7 @@ class AuthController {
 
 		if (!phone) {
 			return res.status(400).json({
+				status: "error",
 				message: "phone field is required"
 			});
 		}
@@ -25,14 +26,14 @@ class AuthController {
 			await otpService.sendBySms(phone, otp);
 
 			res.json({
+				status: "success",
 				hash: `${hash}.${expires}`,
 				phone
 			});
 		} catch (err) {
-			console.log("ERR", err);
-
-			res.status(500).json({
-				message: "could not send OTP"
+			res.status(400).json({
+				status: "error",
+				message: err.message
 			});
 		}
 	}
@@ -42,6 +43,7 @@ class AuthController {
 
 		if (!phone || !otp || !hash) {
 			return res.status(400).json({
+				status: "error",
 				message: "all fields are required"
 			});
 		}
@@ -51,6 +53,7 @@ class AuthController {
 
 		if (Date.now() > +expires) {
 			return res.status(400).json({
+				status: "error",
 				message: "OTP expired"
 			});
 		}
@@ -60,6 +63,7 @@ class AuthController {
 		const isMatched = otpService.verifyOtp(hashedOtp, data);
 		if (!isMatched) {
 			return res.status(400).json({
+				status: "error",
 				message: "invalid OTP"
 			});
 		}
@@ -73,9 +77,9 @@ class AuthController {
 				user = await userService.createUser({ phone });
 			}
 		} catch (err) {
-			console.log("ERR", err);
 			return res.status(500).json({
-				message: "database error"
+				status: "error",
+				message: err.message
 			});
 		}
 
@@ -85,16 +89,24 @@ class AuthController {
 			activated: user.activated
 		});
 
+		// store refreshToken into the database for given user
+		await tokenService.storeRefreshToken(refreshToken, user._id);
+
 		res.cookie("refreshToken", refreshToken, {
 			maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
+			httpOnly: true
+		});
+
+		res.cookie("accessToken", accessToken, {
+			maxAge: 1 * 60 * 60 * 1000, // 1 hour
 			httpOnly: true
 		});
 
 		const userDto = new UserDto(user);
 
 		res.json({
+			status: "success",
 			user: userDto,
-			accessToken,
 			auth: true
 		});
 	}
@@ -104,6 +116,7 @@ class AuthController {
 		res.clearCookie("accessToken");
 
 		res.json({
+			status: "success",
 			user: null,
 			auth: false
 		});
