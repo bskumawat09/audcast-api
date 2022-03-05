@@ -4,11 +4,11 @@ const userSchema = new mongoose.Schema(
 	{
 		phone: {
 			type: String,
-			required: true,
+			required: true
 		},
 		name: {
 			type: String,
-			required: false,
+			required: false
 		},
 		avatar: {
 			type: String,
@@ -18,16 +18,16 @@ const userSchema = new mongoose.Schema(
 					return `${process.env.BASE_URL}${avatar}`;
 				}
 				return avatar;
-			},
+			}
 		},
 		activated: {
 			type: Boolean,
-			default: false,
-		},
+			default: false
+		}
 	},
 	{
 		timestamps: true,
-		toJSON: { getters: true },
+		toJSON: { getters: true }
 	}
 );
 

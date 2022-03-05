@@ -6,25 +6,25 @@ const roomSchema = new Schema(
 	{
 		topic: {
 			type: String,
-			required: true,
+			required: true
 		},
 		roomType: {
 			type: String,
-			required: true,
+			required: true
 		},
 		ownerId: {
 			type: Schema.Types.ObjectId,
-			ref: "User",
+			ref: "User"
 		},
 		speakers: {
 			type: [
 				{
 					type: Schema.Types.ObjectId,
-					ref: "User",
-				},
+					ref: "User"
+				}
 			],
-			required: false,
-		},
+			required: false
+		}
 	},
 	{ timestamps: true }
 );

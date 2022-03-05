@@ -5,7 +5,7 @@ function dbConnect() {
 
 	mongoose.connect(DB_URL, {
 		useNewUrlParser: true,
-		useUnifiedTopology: true,
+		useUnifiedTopology: true
 	});
 
 	const db = mongoose.connection;

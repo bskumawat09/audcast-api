@@ -10,7 +10,7 @@ class AuthController {
 
 		if (!phone) {
 			return res.status(400).json({
-				message: "phone field is required",
+				message: "phone field is required"
 			});
 		}
 
@@ -26,13 +26,13 @@ class AuthController {
 
 			res.json({
 				hash: `${hash}.${expires}`,
-				phone,
+				phone
 			});
 		} catch (err) {
 			console.log("ERR", err);
 
 			res.status(500).json({
-				message: "could not send OTP",
+				message: "could not send OTP"
 			});
 		}
 	}
@@ -42,7 +42,7 @@ class AuthController {
 
 		if (!phone || !otp || !hash) {
 			return res.status(400).json({
-				message: "all fields are required",
+				message: "all fields are required"
 			});
 		}
 
@@ -51,7 +51,7 @@ class AuthController {
 
 		if (Date.now() > +expires) {
 			return res.status(400).json({
-				message: "OTP expired",
+				message: "OTP expired"
 			});
 		}
 
@@ -60,7 +60,7 @@ class AuthController {
 		const isMatched = otpService.verifyOtp(hashedOtp, data);
 		if (!isMatched) {
 			return res.status(400).json({
-				message: "invalid OTP",
+				message: "invalid OTP"
 			});
 		}
 
@@ -75,26 +75,27 @@ class AuthController {
 		} catch (err) {
 			console.log("ERR", err);
 			return res.status(500).json({
-				message: "database error",
+				message: "database error"
 			});
 		}
 
 		// generate jwt tokens and set as cookie
-		const accessToken = tokenService.generateToken({
+		const { accessToken, refreshToken } = tokenService.generateToken({
 			id: user._id,
-			activated: user.activated,
+			activated: user.activated
 		});
 
-		res.cookie("accesstoken", accessToken, {
-			maxAge: 1 * 24 * 60 * 60 * 1000, // 1 day
-			httpOnly: true,
+		res.cookie("refreshToken", refreshToken, {
+			maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
+			httpOnly: true
 		});
 
 		const userDto = new UserDto(user);
 
 		res.json({
 			user: userDto,
-			auth: true,
+			accessToken,
+			auth: true
 		});
 	}
 
@@ -104,7 +105,7 @@ class AuthController {
 
 		res.json({
 			user: null,
-			auth: false,
+			auth: false
 		});
 	}
 }

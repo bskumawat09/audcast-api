@@ -9,7 +9,7 @@ class ActivateController {
 
 		if (!name || !avatar) {
 			res.status(400).json({
-				message: "all fields are required",
+				message: "all fields are required"
 			});
 		}
 
@@ -30,7 +30,7 @@ class ActivateController {
 				.write(path.resolve(__dirname, `../storage/${imagePath}`));
 		} catch (err) {
 			res.status(500).json({
-				message: "could not process image",
+				message: "could not process image"
 			});
 		}
 
@@ -40,7 +40,7 @@ class ActivateController {
 			const user = await userService.findUser({ _id: userId });
 			if (!user) {
 				return res.status(404).json({
-					message: "user not found",
+					message: "user not found"
 				});
 			}
 
@@ -51,11 +51,11 @@ class ActivateController {
 
 			res.json({
 				user: new UserDto(user),
-				auth: true,
+				auth: true
 			});
 		} catch (err) {
 			res.status(500).json({
-				message: "something went wrong",
+				message: "something went wrong"
 			});
 		}
 	}

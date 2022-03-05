@@ -7,18 +7,18 @@ class RoomController {
 
 		if (!topic || !roomType) {
 			return res.status(400).json({
-				message: "all fields are required",
+				message: "all fields are required"
 			});
 		}
 
 		const room = await roomService.create({
 			topic,
 			roomType,
-			ownerId: req.user.id,
+			ownerId: req.user.id
 		});
 
 		res.json({
-			room: new RoomDto(room),
+			room: new RoomDto(room)
 		});
 	}
 
@@ -29,7 +29,7 @@ class RoomController {
 
 		res.json({
 			results: allRooms.length,
-			rooms: allRooms,
+			rooms: allRooms
 		});
 	}
 }
