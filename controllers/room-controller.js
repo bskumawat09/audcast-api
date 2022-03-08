@@ -7,6 +7,7 @@ class RoomController {
 
 		if (!topic || !roomType) {
 			return res.status(400).json({
+				status: "error",
 				message: "all fields are required"
 			});
 		}
@@ -18,6 +19,7 @@ class RoomController {
 		});
 
 		res.json({
+			status: "success",
 			room: new RoomDto(room)
 		});
 	}
@@ -28,6 +30,7 @@ class RoomController {
 		const allRooms = rooms.map((room) => new RoomDto(room));
 
 		res.json({
+			status: "success",
 			results: allRooms.length,
 			rooms: allRooms
 		});
