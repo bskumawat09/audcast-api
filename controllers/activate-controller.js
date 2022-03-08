@@ -1,4 +1,4 @@
-const Jimp = require("jimp");
+const sharp = require("sharp");
 const path = require("path");
 const UserDto = require("../dtos/user-dto");
 const userService = require("../services/user-service");
@@ -24,11 +24,9 @@ class ActivateController {
 
 		// compress image before storing
 		try {
-			const jimpResponse = await Jimp.read(buffer);
-
-			jimpResponse
-				.resize(150, Jimp.AUTO)
-				.write(path.resolve(__dirname, `../storage/${imagePath}`));
+			await sharp(buffer)
+				.resize(150)
+				.toFile(path.resolve(__dirname, `../storage/${imagePath}`));
 		} catch (err) {
 			return res.status(500).json({
 				status: "error",
