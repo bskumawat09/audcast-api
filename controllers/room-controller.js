@@ -35,6 +35,16 @@ class RoomController {
 			rooms: allRooms
 		});
 	}
+
+	async getRoom(req, res) {
+		const { id } = req.params;
+		const room = await roomService.findOneRoom({ _id: id });
+
+		res.json({
+			status: "success",
+			room
+		});
+	}
 }
 
 module.exports = new RoomController();

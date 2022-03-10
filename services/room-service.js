@@ -22,6 +22,11 @@ class RoomService {
 
 		return rooms;
 	}
+
+	async findOneRoom(filter) {
+		const room = await RoomModel.findOne(filter);
+		return room;
+	}
 }
 
 module.exports = new RoomService();
