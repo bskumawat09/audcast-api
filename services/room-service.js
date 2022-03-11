@@ -14,8 +14,8 @@ class RoomService {
 		return room;
 	}
 
-	async findAllRooms(typesArr) {
-		const rooms = await RoomModel.find({ roomType: { $in: typesArr } })
+	async findRooms(filter) {
+		const rooms = await RoomModel.find(filter)
 			.populate("speakers")
 			.populate("ownerId")
 			.exec();
@@ -25,6 +25,20 @@ class RoomService {
 
 	async findOneRoom(filter) {
 		const room = await RoomModel.findOne(filter);
+		return room;
+	}
+
+	async updateRoom(filter, data) {
+		const room = await RoomModel.findOneAndUpdate(
+			filter,
+			{ $set: data },
+			{ new: true }
+		);
+		return room;
+	}
+
+	async deleteRoom(filter) {
+		const room = await RoomModel.findOneAndDelete(filter);
 		return room;
 	}
 }
