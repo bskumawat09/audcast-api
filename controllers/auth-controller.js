@@ -3,16 +3,15 @@ const hashService = require("../services/hash-service");
 const userService = require("../services/user-service");
 const tokenService = require("../services/token-service");
 const UserDto = require("../dtos/user-dto");
+const AppError = require("../utils/AppError");
 
 class AuthController {
-	async sendOtp(req, res) {
+	async sendOtp(req, res, next) {
 		const { phone } = req.body;
 
 		if (!phone) {
-			return res.status(400).json({
-				status: "error",
-				message: "phone field is required"
-			});
+			const error = new AppError("phone field is required", 400);
+			return next(error);
 		}
 
 		const otp = await otpService.generateOtp();
@@ -23,49 +22,42 @@ class AuthController {
 		const hash = hashService.hashOtp(data);
 
 		try {
-			await otpService.sendBySms(phone, otp);
+			// TODO: uncomment inorder to send SMS
+			// await otpService.sendBySms(phone, otp);
 
 			res.json({
 				status: "success",
 				hash: `${hash}.${expires}`,
-				phone
+				phone,
+				otp // TODO: remove "otp" property
 			});
 		} catch (err) {
-			res.status(400).json({
-				status: "error",
-				message: err.message
-			});
+			next(err);
 		}
 	}
 
-	async verifyOtp(req, res) {
+	async verifyOtp(req, res, next) {
 		const { phone, otp, hash } = req.body;
 
 		if (!phone || !otp || !hash) {
-			return res.status(400).json({
-				status: "error",
-				message: "all fields are required"
-			});
+			const error = new AppError("all fields are required", 400);
+			return next(error);
 		}
 
 		// check the OTP
 		const [hashedOtp, expires] = hash.split(".");
 
 		if (Date.now() > +expires) {
-			return res.status(400).json({
-				status: "error",
-				message: "OTP expired"
-			});
+			const error = new AppError("OTP has expired", 400);
+			return next(error);
 		}
 
 		const data = `${phone}.${otp}.${expires}`;
 
 		const isMatched = otpService.verifyOtp(hashedOtp, data);
 		if (!isMatched) {
-			return res.status(400).json({
-				status: "error",
-				message: "invalid OTP"
-			});
+			const error = new AppError("invalid OTP", 400);
+			return next(error);
 		}
 
 		// login the user or register new user
@@ -77,14 +69,11 @@ class AuthController {
 				user = await userService.createUser({ phone });
 			}
 		} catch (err) {
-			return res.status(500).json({
-				status: "error",
-				message: err.message
-			});
+			return next(err);
 		}
 
 		// generate jwt tokens and set as cookie
-		const { accessToken, refreshToken } = tokenService.generateToken({
+		const { accessToken, refreshToken } = tokenService.generateTokens({
 			id: user._id,
 			activated: user.activated
 		});
@@ -93,12 +82,12 @@ class AuthController {
 		await tokenService.storeRefreshToken(refreshToken, user._id);
 
 		res.cookie("refreshToken", refreshToken, {
-			maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
+			maxAge: 5 * 24 * 60 * 60 * 1000, // 5 days
 			httpOnly: true
 		});
 
 		res.cookie("accessToken", accessToken, {
-			maxAge: 1 * 60 * 60 * 1000, // 1 hour
+			maxAge: 60 * 60 * 1000, // 1 hour
 			httpOnly: true
 		});
 
@@ -111,7 +100,7 @@ class AuthController {
 		});
 	}
 
-	async refresh(req, res) {
+	async refresh(req, res, next) {
 		// get refresh token from cookie
 		const { refreshToken: refreshTokenFromCookie } = req.cookies;
 		// check if token is valid
@@ -122,10 +111,7 @@ class AuthController {
 			);
 			userData = decoded;
 		} catch (err) {
-			return res.status(401).json({
-				status: "error",
-				message: err.message
-			});
+			return next(err);
 		}
 		// check if token is in database
 		try {
@@ -134,46 +120,36 @@ class AuthController {
 				refreshTokenFromCookie
 			);
 			if (!token) {
-				return res.status(401).json({
-					status: "error",
-					message: "token not matched in database"
-				});
+				const error = new AppError("token not matched in database", 404);
+				return next(error);
 			}
 		} catch (err) {
-			return res.status(500).json({
-				status: "error",
-				message: err.message
-			});
+			next(err);
 		}
 		// check if user is valid
 		let user;
 		try {
 			user = await userService.findUser({ _id: userData.id });
 			if (!user) {
-				return res.status(404).json({
-					status: "error",
-					message: "user not found"
-				});
+				const error = new AppError("user not found", 404);
+				return next(error);
 			}
 		} catch (err) {
-			return res.status(500).json({
-				status: "error",
-				message: err.message
-			});
+			return next(err);
 		}
+
 		// generate new tokens
-		const { refreshToken, accessToken } = tokenService.generateToken({
+		const { refreshToken, accessToken } = tokenService.generateTokens({
 			id: user._id
 		});
+
 		// store updated refresh token in database
 		try {
 			await tokenService.updateRefreshToken(userData.id, refreshToken);
 		} catch (err) {
-			return res.status(500).json({
-				status: "error",
-				message: err.message
-			});
+			return next(err);
 		}
+
 		// send them as cookie
 		res.cookie("refreshToken", refreshToken, {
 			maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
@@ -184,6 +160,7 @@ class AuthController {
 			maxAge: 1 * 60 * 60 * 1000, // 1 hour
 			httpOnly: true
 		});
+
 		// send response
 		const userDto = new UserDto(user);
 

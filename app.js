@@ -2,6 +2,7 @@ require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
 const cookieParser = require("cookie-parser");
+const errorHandler = require("./controllers/error-controller");
 const ACTIONS = require("./actions");
 
 const app = express();
@@ -14,7 +15,7 @@ const io = require("socket.io")(server, {
 });
 
 const dbConnect = require("./database");
-const router = require("./routes");
+dbConnect();
 
 app.use(cookieParser());
 app.use(
@@ -24,22 +25,27 @@ app.use(
 	})
 );
 app.use(express.json({ limit: "8mb" }));
-app.use("/storage", express.static("storage"));
+app.use("/storage", express.static("storage")); // for serving static files from server
 
-dbConnect();
+const router = require("./routes");
+const AppError = require("./utils/AppError");
+app.use("/api", router);
 
-app.use(router);
-
-app.get("/", (req, res) => {
-	res.send("Welcome to voice chat api");
+app.get("/api", (req, res) => {
+	res.send("Welcome to Audcast API");
 });
+
+app.all("*", (req, res, next) => {
+	const err = new AppError("resource not found", 404);
+	next(err);
+});
+
+app.use(errorHandler); // custom error handler
 
 // sockets
 const socketUserMapping = {};
 
 io.on("connection", (socket) => {
-	console.log("new connection", socket.id);
-
 	socket.on(ACTIONS.JOIN, ({ roomId, user }) => {
 		socketUserMapping[socket.id] = user;
 
@@ -47,7 +53,7 @@ io.on("connection", (socket) => {
 		const clients = Array.from(io.sockets.adapter.rooms.get(roomId) || []);
 
 		clients.forEach((clientId) => {
-			// for every client in a room emit "add-peer" event (say to everyone "hey please add me in your connection")
+			// emit "add-peer" event to every client in a room (say to everyone "hey please add me in your connection")
 			io.to(clientId).emit(ACTIONS.ADD_PEER, {
 				peerSocketId: socket.id,
 				createOffer: false,
@@ -62,7 +68,6 @@ io.on("connection", (socket) => {
 		});
 
 		socket.join(roomId);
-		console.log("clients", clients);
 	});
 
 	// handle relay-ice
@@ -105,7 +110,7 @@ io.on("connection", (socket) => {
 	});
 
 	// handle leaving the room
-	const handleLeaveRoom = () => {
+	function handleLeaveRoom() {
 		const { rooms } = socket;
 		Array.from(rooms).forEach((roomId) => {
 			const clients = Array.from(io.sockets.adapter.rooms.get(roomId) || []);
@@ -127,7 +132,7 @@ io.on("connection", (socket) => {
 		});
 
 		delete socketUserMapping[socket.id];
-	};
+	}
 
 	socket.on(ACTIONS.LEAVE, handleLeaveRoom);
 	socket.on("disconnecting", handleLeaveRoom); // when browser is closed

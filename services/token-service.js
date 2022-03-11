@@ -4,13 +4,13 @@ const refreshTokenSecret = process.env.JWT_REFRESH_TOKEN_SECRET;
 const RefreshModel = require("../models/refresh-model");
 
 class TokenService {
-	generateToken(payload) {
+	generateTokens(payload) {
 		const accessToken = jwt.sign(payload, accessTokenSecret, {
-			expiresIn: "1m" // 1 minute
+			expiresIn: "5m" // 5 minutes
 		});
 
 		const refreshToken = jwt.sign(payload, refreshTokenSecret, {
-			expiresIn: "2d" // 2 days
+			expiresIn: "5d" // 5 days
 		});
 
 		return { accessToken, refreshToken };

@@ -6,14 +6,14 @@ const activateController = require("./controllers/activate-controller");
 const authMiddleware = require("./middlewares/auth-middleware");
 const roomController = require("./controllers/room-controller");
 
-router.post("/api/send-otp", authController.sendOtp);
-router.post("/api/verify-otp", authController.verifyOtp);
-router.post("/api/activate", authMiddleware, activateController.activate);
-router.get("/api/refresh", authController.refresh);
-router.post("/api/logout", authMiddleware, authController.logout);
+router.post("/send-otp", authController.sendOtp);
+router.post("/verify-otp", authController.verifyOtp);
+router.post("/activate", authMiddleware, activateController.activate);
+router.get("/refresh", authController.refresh);
+router.post("/logout", authController.logout);
 
-router.get("/api/rooms", authMiddleware, roomController.getRooms);
-router.post("/api/rooms", authMiddleware, roomController.createRoom);
-router.get("/api/rooms/:id", authMiddleware, roomController.getRoom);
+router.get("/rooms", authMiddleware, roomController.getRooms);
+router.post("/rooms", authMiddleware, roomController.createRoom);
+router.get("/rooms/:id", authMiddleware, roomController.getRoom);
 
 module.exports = router;

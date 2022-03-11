@@ -2,16 +2,15 @@ const sharp = require("sharp");
 const path = require("path");
 const UserDto = require("../dtos/user-dto");
 const userService = require("../services/user-service");
+const AppError = require("../utils/AppError");
 
 class ActivateController {
-	async activate(req, res) {
+	async activate(req, res, next) {
 		const { name, avatar } = req.body;
 
 		if (!name || !avatar) {
-			return res.status(400).json({
-				status: "error",
-				message: "all fields are required"
-			});
+			const error = new AppError("all fields are required", 400);
+			return next(error);
 		}
 
 		// store image (base64)
@@ -28,21 +27,15 @@ class ActivateController {
 				.resize(150)
 				.toFile(path.resolve(__dirname, `../storage/${imagePath}`));
 		} catch (err) {
-			return res.status(500).json({
-				status: "error",
-				message: err.message
-			});
+			return next(err);
 		}
 
-		// update user
-		const userId = req.user.id;
 		try {
+			// update user
+			const userId = req.user.id;
 			const user = await userService.findUser({ _id: userId });
 			if (!user) {
-				return res.status(404).json({
-					status: "error",
-					message: "user not found"
-				});
+				throw new AppError("user not found", 404);
 			}
 
 			user.name = name;
@@ -56,10 +49,7 @@ class ActivateController {
 				auth: true
 			});
 		} catch (err) {
-			res.status(500).json({
-				status: "error",
-				message: "something went wrong"
-			});
+			next(err);
 		}
 	}
 }
