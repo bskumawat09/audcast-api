@@ -10,7 +10,10 @@ const app = express();
 /* configure socket.io */
 const server = require("http").createServer(app);
 const io = require("socket.io")(server, {
-	cors: { origin: process.env.CLIENT_URL, methods: ["GET", "POST"] }
+	cors: {
+		origin: process.env.CLIENT_URL,
+		methods: ["GET", "POST"]
+	}
 });
 
 const dbConnect = require("./database");
@@ -20,7 +23,7 @@ dbConnect();
 app.use(cookieParser());
 app.use(
 	cors({
-		origin: "*",
+		origin: [process.env.CLIENT_URL],
 		credentials: true
 	})
 );
