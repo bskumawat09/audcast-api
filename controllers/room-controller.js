@@ -45,7 +45,7 @@ class RoomController {
 		}
 	}
 
-	async getRoom(req, res, next) {
+	async getOneRoom(req, res, next) {
 		try {
 			const { id } = req.params;
 			const room = await roomService.findOneRoom({ _id: id });
@@ -80,8 +80,12 @@ class RoomController {
 			let room = await roomService.findOneRoom({ _id: id });
 
 			// check if current user owns this room
-			if (room.ownerId !== req.user.id) {
-				return next("you are not authorized to perform this operation", 403);
+			if (!room.ownerId.equals(req.user.id)) {
+				const error = new AppError(
+					"you are not authorized to perform this operation",
+					403
+				);
+				return next(error);
 			}
 
 			room = await roomService.updateRoom({ _id: id }, data);
@@ -101,8 +105,12 @@ class RoomController {
 			const room = await roomService.findOneRoom({ _id: id });
 
 			// check if current user owns this room
-			if (room.ownerId !== req.user.id) {
-				return next("you are not authorized to perform this operation", 403);
+			if (!room.ownerId.equals(req.user.id)) {
+				const error = new AppError(
+					"you are not authorized to perform this operation",
+					403
+				);
+				return next(error);
 			}
 
 			await roomService.deleteRoom({ _id: id });

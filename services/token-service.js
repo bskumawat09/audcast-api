@@ -25,14 +25,10 @@ class TokenService {
 	}
 
 	async storeRefreshToken(token, userId) {
-		try {
-			await RefreshModel.create({
-				token,
-				user: userId
-			});
-		} catch (err) {
-			console.log(err);
-		}
+		await RefreshModel.create({
+			token,
+			user: userId
+		});
 	}
 
 	async findRefreshToken(userId, refreshToken) {

@@ -60,44 +60,41 @@ class AuthController {
 			return next(error);
 		}
 
-		// login the user or register new user
-		let user;
-
 		try {
+			// login the user or register new user
+			let user;
 			user = await userService.findUser({ phone });
 			if (!user) {
 				user = await userService.createUser({ phone });
 			}
+
+			// generate jwt tokens and set as cookie
+			const { accessToken, refreshToken } = tokenService.generateTokens({
+				id: user._id,
+				activated: user.activated
+			});
+
+			// store refreshToken into the database for given user
+			await tokenService.storeRefreshToken(refreshToken, user._id);
+
+			res.cookie("refreshToken", refreshToken, {
+				maxAge: 5 * 24 * 60 * 60 * 1000, // 5 days
+				httpOnly: true
+			});
+
+			res.cookie("accessToken", accessToken, {
+				maxAge: 60 * 60 * 1000, // 1 hour
+				httpOnly: true
+			});
+
+			res.json({
+				status: "success",
+				user: new UserDto(user),
+				auth: true
+			});
 		} catch (err) {
-			return next(err);
+			next(err);
 		}
-
-		// generate jwt tokens and set as cookie
-		const { accessToken, refreshToken } = tokenService.generateTokens({
-			id: user._id,
-			activated: user.activated
-		});
-
-		// store refreshToken into the database for given user
-		await tokenService.storeRefreshToken(refreshToken, user._id);
-
-		res.cookie("refreshToken", refreshToken, {
-			maxAge: 5 * 24 * 60 * 60 * 1000, // 5 days
-			httpOnly: true
-		});
-
-		res.cookie("accessToken", accessToken, {
-			maxAge: 60 * 60 * 1000, // 1 hour
-			httpOnly: true
-		});
-
-		const userDto = new UserDto(user);
-
-		res.json({
-			status: "success",
-			user: userDto,
-			auth: true
-		});
 	}
 
 	async refresh(req, res, next) {
@@ -161,31 +158,31 @@ class AuthController {
 			httpOnly: true
 		});
 
-		// send response
-		const userDto = new UserDto(user);
-
 		res.json({
 			status: "success",
-			user: userDto,
+			user: new UserDto(user),
 			auth: true
 		});
 	}
 
-	async logout(req, res) {
-		const { refreshToken } = req.cookies;
+	async logout(req, res, next) {
+		try {
+			const { refreshToken } = req.cookies;
+			// delete refresh token from database
+			await tokenService.removeToken(refreshToken);
 
-		// delete refresh token from database
-		await tokenService.removeToken(refreshToken);
+			// delete tokens from cookies
+			res.clearCookie("refreshToken");
+			res.clearCookie("accessToken");
 
-		// delete tokens from cookies
-		res.clearCookie("refreshToken");
-		res.clearCookie("accessToken");
-
-		res.json({
-			status: "success",
-			user: null,
-			auth: false
-		});
+			res.json({
+				status: "success",
+				user: null,
+				auth: false
+			});
+		} catch (err) {
+			next(err);
+		}
 	}
 }
 

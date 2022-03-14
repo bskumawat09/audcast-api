@@ -15,10 +15,10 @@ class OtpService {
 	}
 
 	async sendBySms(number, otp) {
-		// send OTP using some 3rd party service (Twilio)
+		// send OTP using some 3rd party service (e.g Twilio)
 		const response = await twilio.messages.create({
 			to: number,
-			from: process.env.TWILIO_PHONE_NUMBER,
+			from: process.env.TWILIO_FROM_PHONE,
 			body: `Your Audcast OTP is ${otp}`
 		});
 

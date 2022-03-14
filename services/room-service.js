@@ -16,8 +16,8 @@ class RoomService {
 
 	async findRooms(filter) {
 		const rooms = await RoomModel.find(filter)
-			.populate("speakers")
 			.populate("ownerId")
+			.populate("speakers")
 			.exec();
 
 		return rooms;

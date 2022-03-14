@@ -17,13 +17,12 @@ module.exports = async (req, res, next) => {
 		// if the user associated with token no longer exist
 		const user = await userService.findUser({ _id: userData.id });
 		if (!user) {
-			throw new AppError("user no longer exit", 404);
+			throw new AppError("user no longer exit", 401);
 		}
 
 		req.user = userData;
 		next();
 	} catch (err) {
-		const error = new AppError(err.message, 401);
-		next(error);
+		next(err);
 	}
 };

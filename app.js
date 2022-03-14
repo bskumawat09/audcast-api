@@ -7,9 +7,8 @@ const ACTIONS = require("./actions");
 
 const app = express();
 
+/* configure socket.io */
 const server = require("http").createServer(app);
-
-// configure socket.io
 const io = require("socket.io")(server, {
 	cors: { origin: process.env.CLIENT_URL, methods: ["GET", "POST"] }
 });
@@ -17,6 +16,7 @@ const io = require("socket.io")(server, {
 const dbConnect = require("./database");
 dbConnect();
 
+/* middlewares */
 app.use(cookieParser());
 app.use(
 	cors({
@@ -32,7 +32,7 @@ const AppError = require("./utils/AppError");
 app.use("/api", router);
 
 app.get("/api", (req, res) => {
-	res.send("Welcome to Audcast API");
+	res.send("Welcome to Audcast REST API");
 });
 
 app.all("*", (req, res, next) => {
@@ -42,7 +42,7 @@ app.all("*", (req, res, next) => {
 
 app.use(errorHandler); // custom error handler
 
-// sockets
+/* sockets */
 const socketUserMapping = {};
 
 io.on("connection", (socket) => {
@@ -86,7 +86,7 @@ io.on("connection", (socket) => {
 		});
 	});
 
-	// handle mute/unmute
+	// handle mute
 	socket.on(ACTIONS.MUTE, ({ roomId, userId }) => {
 		const clients = Array.from(io.sockets.adapter.rooms.get(roomId) || []);
 
@@ -98,6 +98,7 @@ io.on("connection", (socket) => {
 		});
 	});
 
+	// handle unmute
 	socket.on(ACTIONS.UNMUTE, ({ roomId, userId }) => {
 		const clients = Array.from(io.sockets.adapter.rooms.get(roomId) || []);
 
@@ -135,7 +136,7 @@ io.on("connection", (socket) => {
 	}
 
 	socket.on(ACTIONS.LEAVE, handleLeaveRoom);
-	socket.on("disconnecting", handleLeaveRoom); // when browser is closed
+	socket.on("disconnecting", handleLeaveRoom); // when the browser is closed
 });
 
 const PORT = process.env.PORT || 5000;

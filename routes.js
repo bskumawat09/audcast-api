@@ -14,9 +14,9 @@ router.post("/logout", authController.logout);
 
 router.get("/rooms", authMiddleware, roomController.getRooms);
 router.post("/rooms", authMiddleware, roomController.createRoom);
-router.get("/rooms/my-rooms", authMiddleware, roomController.getMyRooms);
-router.get("/rooms/:id", authMiddleware, roomController.getRoom);
+router.get("/rooms/:id", authMiddleware, roomController.getOneRoom);
 router.put("/rooms/:id", authMiddleware, roomController.updateRoom);
 router.delete("/rooms/:id", authMiddleware, roomController.deleteRoom);
+router.get("/rooms/my-rooms", authMiddleware, roomController.getMyRooms);
 
 module.exports = router;

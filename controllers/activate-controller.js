@@ -32,8 +32,7 @@ class ActivateController {
 
 		try {
 			// update user
-			const userId = req.user.id;
-			const user = await userService.findUser({ _id: userId });
+			const user = await userService.findUser({ _id: req.user.id });
 			if (!user) {
 				throw new AppError("user not found", 404);
 			}
