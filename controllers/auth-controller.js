@@ -7,22 +7,21 @@ const AppError = require("../utils/AppError");
 
 class AuthController {
 	async sendOtp(req, res, next) {
-		const { phone } = req.body;
-
-		if (!phone) {
-			const error = new AppError("phone field is required", 400);
-			return next(error);
-		}
-
-		// const otp = await otpService.generateOtp();
-		const otp = 97979; // TODO: remove it in production
-		const validity = 5 * 60 * 1000; // 5 minutes
-		const expires = Date.now() + validity; // curr_time + 5 minutes
-		const data = `${phone}.${otp}.${expires}`;
-
-		const hash = hashService.hashOtp(data);
-
 		try {
+			const { phone } = req.body;
+
+			if (!phone) {
+				throw new AppError("phone field is required", 400);
+			}
+
+			// const otp = await otpService.generateOtp();
+			const otp = 97979; // TODO: remove it in production
+			const validity = 5 * 60 * 1000; // 5 minutes
+			const expires = Date.now() + validity; // curr_time + 5 minutes
+			const data = `${phone}.${otp}.${expires}`;
+
+			const hash = hashService.hashOtp(data);
+
 			// TODO: uncomment inorder to send SMS
 			// await otpService.sendBySms(phone, otp);
 
@@ -37,30 +36,26 @@ class AuthController {
 	}
 
 	async verifyOtp(req, res, next) {
-		const { phone, otp, hash } = req.body;
-
-		if (!phone || !otp || !hash) {
-			const error = new AppError("all fields are required", 400);
-			return next(error);
-		}
-
-		// check the OTP
-		const [hashedOtp, expires] = hash.split(".");
-
-		if (Date.now() > +expires) {
-			const error = new AppError("OTP has expired", 400);
-			return next(error);
-		}
-
-		const data = `${phone}.${otp}.${expires}`;
-
-		const isMatched = otpService.verifyOtp(hashedOtp, data);
-		if (!isMatched) {
-			const error = new AppError("invalid OTP", 400);
-			return next(error);
-		}
-
 		try {
+			const { phone, otp, hash } = req.body;
+			if (!phone || !otp || !hash) {
+				throw new AppError("all fields are required", 400);
+			}
+
+			// check the OTP
+			const [hashedOtp, expires] = hash.split(".");
+
+			if (Date.now() > +expires) {
+				throw new AppError("OTP has expired", 400);
+			}
+
+			const data = `${phone}.${otp}.${expires}`;
+
+			const isMatched = otpService.verifyOtp(hashedOtp, data);
+			if (!isMatched) {
+				throw new AppError("invalid OTP", 400);
+			}
+
 			// login the user or register new user
 			let user;
 			user = await userService.findUser({ phone });

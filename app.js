@@ -2,7 +2,7 @@ if (process.env.NODE_ENV !== "production") {
 	require("dotenv").config();
 }
 const express = require("express");
-const cors = require("cors");
+const Cors = require("cors");
 const cookieParser = require("cookie-parser");
 const AppError = require("./utils/AppError");
 const errorHandler = require("./controllers/error-controller");
@@ -14,7 +14,7 @@ const app = express();
 const server = require("http").createServer(app);
 const io = require("socket.io")(server, {
 	cors: {
-		origin: process.env.CLIENT_URL,
+		origin: [process.env.CLIENT_URL, "http://localhost:3000"],
 		methods: ["GET", "POST"]
 	}
 });
@@ -23,14 +23,14 @@ const dbConnect = require("./database");
 dbConnect();
 
 /* middlewares */
-app.use(express.json({ limit: "5mb" }));
 app.use(cookieParser());
 app.use(
-	cors({
-		origin: [process.env.CLIENT_URL, "http://localhost:3000"],
-		credentials: true
+	Cors({
+		credentials: true,
+		origin: [process.env.CLIENT_URL, "http://localhost:3000"]
 	})
 );
+app.use(express.json({ limit: "5mb" }));
 app.use("/storage", express.static("storage")); // for serving static files from server
 
 const router = require("./routes");
