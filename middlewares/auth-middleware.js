@@ -23,6 +23,8 @@ module.exports = async (req, res, next) => {
 		req.user = userData;
 		next();
 	} catch (err) {
-		next(err);
+		// for every error originated from here, send response code "401" so that client can invoke refresh route
+		const error = new AppError(err.message, 401);
+		next(error);
 	}
 };

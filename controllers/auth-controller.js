@@ -14,7 +14,8 @@ class AuthController {
 			return next(error);
 		}
 
-		const otp = await otpService.generateOtp();
+		// const otp = await otpService.generateOtp();
+		const otp = 97979; // TODO: remove it in production
 		const validity = 5 * 60 * 1000; // 5 minutes
 		const expires = Date.now() + validity; // curr_time + 5 minutes
 		const data = `${phone}.${otp}.${expires}`;
@@ -28,8 +29,7 @@ class AuthController {
 			res.json({
 				status: "success",
 				hash: `${hash}.${expires}`,
-				phone,
-				otp // TODO: remove "otp" property
+				phone
 			});
 		} catch (err) {
 			next(err);
@@ -79,12 +79,16 @@ class AuthController {
 
 			res.cookie("refreshToken", refreshToken, {
 				maxAge: 5 * 24 * 60 * 60 * 1000, // 5 days
-				httpOnly: true
+				httpOnly: true,
+				sameSite: "none",
+				secure: true
 			});
 
 			res.cookie("accessToken", accessToken, {
-				maxAge: 60 * 60 * 1000, // 1 hour
-				httpOnly: true
+				maxAge: 5 * 60 * 1000, // 5 minutes
+				httpOnly: true,
+				sameSite: "none",
+				secure: true
 			});
 
 			res.json({
@@ -149,13 +153,17 @@ class AuthController {
 
 		// send them as cookie
 		res.cookie("refreshToken", refreshToken, {
-			maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
-			httpOnly: true
+			maxAge: 5 * 24 * 60 * 60 * 1000, // 5 days
+			httpOnly: true,
+			sameSite: "none",
+			secure: true
 		});
 
 		res.cookie("accessToken", accessToken, {
-			maxAge: 1 * 60 * 60 * 1000, // 1 hour
-			httpOnly: true
+			maxAge: 5 * 60 * 1000, // 5 minutes
+			httpOnly: true,
+			sameSite: "none",
+			secure: true
 		});
 
 		res.json({

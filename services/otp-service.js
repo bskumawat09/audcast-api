@@ -29,7 +29,6 @@ class OtpService {
 
 	verifyOtp(hashedOtp, data) {
 		const computedHash = hashService.hashOtp(data);
-
 		return computedHash === hashedOtp;
 	}
 }
