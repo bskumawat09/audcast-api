@@ -19,7 +19,7 @@ const io = require("socket.io")(server, {
 	}
 });
 
-const dbConnect = require("./database");
+const dbConnect = require("./config/database-config");
 dbConnect();
 
 /* middlewares */
