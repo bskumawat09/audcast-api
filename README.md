@@ -7,7 +7,7 @@
 1.  Clone the project from github. Change "myproject" to your project name.
 
 ```bash
-git clone https://github.com/bskumawat09/voice-chat-api.git
+git clone https://github.com/bskumawat09/audcast-api.git
 ```
 
 ### Using manual download ZIP
@@ -58,9 +58,16 @@ Press CTRL+C
 
 The application uses multiple Restful APIs to perform various actions. APIs working in this application are listed as follows:
 
-| API           | Request | Operation                         |
-| ------------- | ------- | --------------------------------- |
-| `/send-otp`   | `POST`  | Generate OTP and send it on email |
-| `/verify-otp` | `POST`  | Verify OTP and register the user  |
-| `/activate`   | `POST`  | Activate the account              |
-| `/logout`     | `GET`   | Logout user                       |
+| API               | Request  | Operation                                   |
+| ----------------- | -------- | ------------------------------------------- |
+| `/send-otp`       | `POST`   | Generate OTP and send it via phone or email |
+| `/verify-otp`     | `POST`   | Verify OTP and register the user            |
+| `/activate`       | `POST`   | Activate the account                        |
+| `/refresh`        | `GET`    | Refresh the access token                    |
+| `/logout`         | `POST`   | Logout user                                 |
+| `/rooms`          | `GET`    | Get all the public rooms                    |
+| `/rooms`          | `POST`   | Create new room                             |
+| `/rooms/:id`      | `GET`    | Get room with {id}                          |
+| `/rooms/:id`      | `PUT`    | Update room with {id}                       |
+| `/rooms/:id`      | `DELETE` | Delete room with {id}                       |
+| `/rooms/my-rooms` | `GET`    | Get rooms of current logged-in user         |

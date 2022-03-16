@@ -10,8 +10,7 @@ class ActivateController {
 			const { name, avatar } = req.body;
 
 			if (!name || !avatar) {
-				const error = new AppError("all fields are required", 400);
-				return next(error);
+				throw new AppError("all fields are required", 400);
 			}
 
 			// store image (base64)
@@ -37,6 +36,9 @@ class ActivateController {
 
 			// upload avatar to cloudinary
 			const uploadRes = await userService.uploadAvatar(imageBuffer);
+			if (!uploadRes) {
+				throw new AppError("could not upload image", 500);
+			}
 
 			user.name = name;
 			user.avatar = uploadRes.url;
