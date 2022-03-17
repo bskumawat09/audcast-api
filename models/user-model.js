@@ -4,7 +4,14 @@ const userSchema = new mongoose.Schema(
 	{
 		phone: {
 			type: String,
-			required: true
+			minlength: 10,
+			maxlength: 13,
+			trim: true
+		},
+		email: {
+			type: String,
+			lowercase: true,
+			trim: true
 		},
 		name: {
 			type: String,

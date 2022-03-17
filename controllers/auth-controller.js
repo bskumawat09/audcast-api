@@ -8,37 +8,50 @@ const AppError = require("../utils/AppError");
 class AuthController {
 	async sendOtp(req, res, next) {
 		try {
-			const { phone } = req.body;
+			const { phone, email } = req.body;
 
-			if (!phone) {
-				throw new AppError("phone field is required", 400);
+			if (!phone && !email) {
+				throw new AppError("phone or email field is required", 400);
 			}
 
 			// const otp = await otpService.generateOtp();
 			const otp = 97979; // TODO: remove it in production
-			const validity = 5 * 60 * 1000; // 5 minutes
-			const expires = Date.now() + validity; // curr_time + 5 minutes
-			const data = `${phone}.${otp}.${expires}`;
+			const validity = 10 * 60 * 1000; // 10 minutes
+			const expires = Date.now() + validity; // curr_time + 10 minutes
 
-			const hash = hashService.hashOtp(data);
+			if (phone) {
+				const data = `${phone}.${otp}.${expires}`;
+				const hash = hashService.hashOtp(data);
 
-			// TODO: uncomment inorder to send SMS
-			// await otpService.sendBySms(phone, otp);
+				// await otpService.sendBySms(phone, otp);
 
-			res.json({
-				status: "success",
-				hash: `${hash}.${expires}`,
-				phone
-			});
+				res.json({
+					status: "success",
+					hash: `${hash}.${expires}`,
+					phone
+				});
+			} else if (email) {
+				const data = `${email}.${otp}.${expires}`;
+				const hash = hashService.hashOtp(data);
+
+				// await otpService.sendByMail(email, otp);
+
+				res.json({
+					status: "success",
+					hash: `${hash}.${expires}`,
+					email
+				});
+			}
 		} catch (err) {
+			console.log(err);
 			next(err);
 		}
 	}
 
 	async verifyOtp(req, res, next) {
 		try {
-			const { phone, otp, hash } = req.body;
-			if (!phone || !otp || !hash) {
+			const { phone, otp, hash, email } = req.body;
+			if ((!phone && !email) || !otp || !hash) {
 				throw new AppError("all fields are required", 400);
 			}
 
@@ -49,7 +62,12 @@ class AuthController {
 				throw new AppError("OTP has expired", 400);
 			}
 
-			const data = `${phone}.${otp}.${expires}`;
+			let data;
+			if (phone) {
+				data = `${phone}.${otp}.${expires}`;
+			} else if (email) {
+				data = `${email}.${otp}.${expires}`;
+			}
 
 			const isMatched = otpService.verifyOtp(hashedOtp, data);
 			if (!isMatched) {
@@ -58,9 +76,16 @@ class AuthController {
 
 			// login the user or register new user
 			let user;
-			user = await userService.findUser({ phone });
-			if (!user) {
-				user = await userService.createUser({ phone });
+			if (phone) {
+				user = await userService.findUser({ phone });
+				if (!user) {
+					user = await userService.createUser({ phone });
+				}
+			} else if (email) {
+				user = await userService.findUser({ email });
+				if (!user) {
+					user = await userService.createUser({ email });
+				}
 			}
 
 			// generate jwt tokens and set as cookie
@@ -73,14 +98,14 @@ class AuthController {
 			await tokenService.storeRefreshToken(refreshToken, user._id);
 
 			res.cookie("refreshToken", refreshToken, {
-				maxAge: 5 * 24 * 60 * 60 * 1000, // 5 days
+				maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
 				httpOnly: true,
 				sameSite: "none",
 				secure: true
 			});
 
 			res.cookie("accessToken", accessToken, {
-				maxAge: 5 * 60 * 1000, // 5 minutes
+				maxAge: 15 * 60 * 1000, // 15 minutes
 				httpOnly: true,
 				sameSite: "none",
 				secure: true
@@ -148,14 +173,14 @@ class AuthController {
 
 		// send them as cookie
 		res.cookie("refreshToken", refreshToken, {
-			maxAge: 5 * 24 * 60 * 60 * 1000, // 5 days
+			maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
 			httpOnly: true,
 			sameSite: "none",
 			secure: true
 		});
 
 		res.cookie("accessToken", accessToken, {
-			maxAge: 5 * 60 * 1000, // 5 minutes
+			maxAge: 15 * 60 * 1000, // 15 minutes
 			httpOnly: true,
 			sameSite: "none",
 			secure: true

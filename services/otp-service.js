@@ -1,5 +1,6 @@
 const crypto = require("crypto");
 const hashService = require("./hash-service");
+const { createMailOptions, sendMail } = require("./mail-service");
 
 const twilioAccountSid = process.env.TWILIO_ACCOUNT_SID;
 const twilioAuthToken = process.env.TWILIO_AUTH_TOKEN;
@@ -24,6 +25,15 @@ class OtpService {
 
 		console.log(`OTP (${otp}) sent to ${number}`);
 		console.log(response.sid);
+		return response;
+	}
+
+	async sendByMail(email, otp) {
+		// send OTP using some 3rd party service (e.g Nodemailer)
+		const options = createMailOptions(email, otp);
+		const { response } = await sendMail(options);
+		console.log(`OTP (${otp}) sent to ${email}`);
+		console.log(response);
 		return response;
 	}
 
