@@ -1,4 +1,6 @@
-# Voicechat API using WebRTC
+# Audcast API
+
+> RESTful API for Real-time Audio Podcast platform using Socket.io and WebRTC.
 
 ## How to Install
 
@@ -44,7 +46,7 @@ node app.js
 You will know server is running by checking the output of the command `node app.js`
 
 ```bash
-Listening on port 3000
+Listening on port: 5000
 Database connected...
 ```
 
