@@ -2,6 +2,24 @@
 
 > RESTful API for Real-time Audio Podcast platform using Socket.io and WebRTC.
 
+## API Collection
+
+The application uses multiple Restful APIs to perform various actions. APIs working in this application are listed as follows:
+
+| API               | Request  | Operation                                   |
+| ----------------- | -------- | ------------------------------------------- |
+| `/send-otp`       | `POST`   | Generate OTP and send it via phone or email |
+| `/verify-otp`     | `POST`   | Verify OTP and register the user            |
+| `/activate`       | `POST`   | Activate the account                        |
+| `/refresh`        | `GET`    | Refresh the access token                    |
+| `/logout`         | `POST`   | Logout user                                 |
+| `/rooms`          | `GET`    | Get all the public rooms                    |
+| `/rooms`          | `POST`   | Create new room                             |
+| `/rooms/:id`      | `GET`    | Get room with {id}                          |
+| `/rooms/:id`      | `PUT`    | Update room with {id}                       |
+| `/rooms/:id`      | `DELETE` | Delete room with {id}                       |
+| `/rooms/my-rooms` | `GET`    | Get rooms of current logged-in user         |
+
 ## How to Install
 
 ### Using Git (recommended)
@@ -55,21 +73,3 @@ Database connected...
 ```
 Press CTRL+C
 ```
-
-## API Collection
-
-The application uses multiple Restful APIs to perform various actions. APIs working in this application are listed as follows:
-
-| API               | Request  | Operation                                   |
-| ----------------- | -------- | ------------------------------------------- |
-| `/send-otp`       | `POST`   | Generate OTP and send it via phone or email |
-| `/verify-otp`     | `POST`   | Verify OTP and register the user            |
-| `/activate`       | `POST`   | Activate the account                        |
-| `/refresh`        | `GET`    | Refresh the access token                    |
-| `/logout`         | `POST`   | Logout user                                 |
-| `/rooms`          | `GET`    | Get all the public rooms                    |
-| `/rooms`          | `POST`   | Create new room                             |
-| `/rooms/:id`      | `GET`    | Get room with {id}                          |
-| `/rooms/:id`      | `PUT`    | Update room with {id}                       |
-| `/rooms/:id`      | `DELETE` | Delete room with {id}                       |
-| `/rooms/my-rooms` | `GET`    | Get rooms of current logged-in user         |
