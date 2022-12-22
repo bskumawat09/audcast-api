@@ -125,12 +125,12 @@ io.on("connection", (socket) => {
 				// say to everyone "hey please remove me from your connection"
 				io.to(clientId).emit(ACTIONS.REMOVE_PEER, {
 					peerSocketId: socket.id,
-					userId: socketUserMapping[socket.id]?.id
+					userId: socketUserMapping[socket.id]
 				});
 
 				socket.emit(ACTIONS.REMOVE_PEER, {
 					peerSocketId: clientId,
-					userId: socketUserMapping[clientId]?.id
+					userId: socketUserMapping[clientId]
 				});
 			});
 
