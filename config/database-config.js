@@ -1,18 +1,25 @@
 const mongoose = require("mongoose");
 
-function dbConnect() {
-	const DB_URL = process.env.DB_URL;
+function connectDB() {
+    const DB_URL = process.env.DB_URL;
 
-	mongoose.connect(DB_URL, {
-		useNewUrlParser: true,
-		useUnifiedTopology: true
-	});
+    mongoose
+        .connect(DB_URL, {
+            useNewUrlParser: true,
+            useUnifiedTopology: true,
+        })
+        .catch((error) => console.log(error));
 
-	const db = mongoose.connection;
-	db.on("error", console.error.bind(console, "connection error:"));
-	db.once("open", () => {
-		console.log("Database connected...");
-	});
+    const db = mongoose.connection;
+
+    db.on("error", console.error.bind(console, "connection error:"));
+    db.once("open", () => {
+        if (process.env.NODE_ENV === "developement") {
+            console.log(`Database connected to ${DB_URL}`);
+        } else {
+            console.log("Database connected");
+        }
+    });
 }
 
-module.exports = dbConnect;
+module.exports = connectDB;

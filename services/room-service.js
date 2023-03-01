@@ -1,46 +1,43 @@
 const RoomModel = require("../models/room-model");
 
 class RoomService {
-	async create(data) {
-		const { topic, roomType, ownerId } = data;
+    async create(data) {
+        const { topic, roomType, ownerId } = data;
 
-		const room = await RoomModel.create({
-			topic,
-			roomType,
-			ownerId,
-			speakers: [ownerId]
-		});
+        const room = await RoomModel.create({
+            topic,
+            roomType,
+            ownerId,
+            speakers: [ownerId],
+        });
 
-		return room;
-	}
+        return room;
+    }
 
-	async findRooms(filter) {
-		const rooms = await RoomModel.find(filter)
-			.populate("ownerId")
-			.populate("speakers")
-			.exec();
+    async findRooms(filter) {
+        const rooms = await RoomModel.find(filter).populate("speakers").exec();
 
-		return rooms;
-	}
+        return rooms;
+    }
 
-	async findOneRoom(filter) {
-		const room = await RoomModel.findOne(filter);
-		return room;
-	}
+    async findOneRoom(filter) {
+        const room = await RoomModel.findOne(filter).populate("speakers");
+        return room;
+    }
 
-	async updateRoom(filter, data) {
-		const room = await RoomModel.findOneAndUpdate(
-			filter,
-			{ $set: data },
-			{ new: true }
-		);
-		return room;
-	}
+    async updateRoom(filter, data) {
+        const room = await RoomModel.findOneAndUpdate(
+            filter,
+            { $set: data },
+            { new: true }
+        );
+        return room;
+    }
 
-	async deleteRoom(filter) {
-		const room = await RoomModel.findOneAndDelete(filter);
-		return room;
-	}
+    async deleteRoom(filter) {
+        const room = await RoomModel.findOneAndDelete(filter);
+        return room._id;
+    }
 }
 
 module.exports = new RoomService();
