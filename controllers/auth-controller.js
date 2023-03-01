@@ -9,14 +9,14 @@ const refreshCookieOptions = {
     maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
     httpOnly: true,
     sameSite: "none",
-    secure: true, //TODO
+    secure: true,
 };
 
 const accessCookieOptions = {
     maxAge: 30 * 60 * 1000, // 30 minutes
     httpOnly: true,
     sameSite: "none",
-    secure: true, //TODO
+    secure: true,
 };
 
 class AuthController {
@@ -29,7 +29,7 @@ class AuthController {
             }
 
             // const otp = await otpService.generateOtp();
-            const otp = 97979; // TODO: remove it in production
+            const otp = 97979; // TODO: remove this hardcoded OTP in production
             const validity = 10 * 60 * 1000; // 10 minutes
             const expires = Date.now() + validity; // curr_time + 10 minutes
 
@@ -37,7 +37,7 @@ class AuthController {
                 const data = `${phone}.${otp}.${expires}`;
                 const hash = hashService.hashOtp(data);
 
-                await otpService.sendBySms(phone, otp);
+                // await otpService.sendBySms(phone, otp); //TODO: enable actual sending sms
 
                 res.json({
                     status: "success",
@@ -48,7 +48,7 @@ class AuthController {
                 const data = `${email}.${otp}.${expires}`;
                 const hash = hashService.hashOtp(data);
 
-                // await otpService.sendByMail(email, otp);
+                // await otpService.sendByMail(email, otp); //TODO: enable actual sending email
 
                 res.json({
                     status: "success",
