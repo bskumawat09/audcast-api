@@ -126,67 +126,55 @@ class AuthController {
     }
 
     async refresh(req, res, next) {
-        // get refresh token from cookie
-        const { refreshToken: refreshTokenFromCookie } = req.cookies;
-
-        // check if token is valid
-        let userData;
         try {
+            // get refresh token from cookie
+            const { refreshToken: refreshTokenFromCookie } = req.cookies;
+            if (!refreshTokenFromCookie) {
+                throw new AppError("refresh token is missing", 400);
+            }
+
+            // check if token is valid
+            let userData;
             const decoded = await tokenService.verifyRefreshToken(
                 refreshTokenFromCookie
             );
             userData = decoded;
-        } catch (err) {
-            console.log("AUTH CONTROLLER | refresh()--------------->", err);
-            return next(err);
-        }
 
-        // check if token is present in database
-        try {
-            const filter = { user: userData.id, token: refreshTokenFromCookie };
+            // check if token is present in database
+            let filter = { user: userData.id, token: refreshTokenFromCookie };
             const token = await tokenService.findRefreshToken(filter);
             if (!token) {
                 throw new AppError("token not matched in database", 404);
             }
-        } catch (err) {
-            console.log("AUTH CONTROLLER | refresh()--------------->", err);
-            return next(err);
-        }
-        // check if user is valid
-        let user;
-        try {
-            user = await userService.findUser({ _id: userData.id });
+
+            // check if user is valid
+            const user = await userService.findUser({ _id: userData.id });
             if (!user) {
                 throw new AppError("user not found", 404);
             }
-        } catch (err) {
-            console.log("AUTH CONTROLLER | refresh()--------------->", err);
-            return next(err);
-        }
 
-        // generate new tokens
-        const { refreshToken, accessToken } = tokenService.generateTokens({
-            id: user._id,
-        });
+            // generate new tokens
+            const { refreshToken, accessToken } = tokenService.generateTokens({
+                id: user._id,
+            });
 
-        // store updated refresh-token in database
-        try {
-            const filter = { user: userData.id, token: refreshTokenFromCookie };
+            // store updated refresh-token in database
             await tokenService.updateRefreshToken(filter, refreshToken);
+
+            // set them as cookie
+            res.cookie("refreshToken", refreshToken, refreshCookieOptions);
+            res.cookie("accessToken", accessToken, accessCookieOptions);
+
+            res.json({
+                status: "success",
+                user: new UserDto(user),
+                auth: true,
+            });
         } catch (err) {
             console.log("AUTH CONTROLLER | refresh()--------------->", err);
-            return next(err);
+            if (err.name === "JsonWebTokenError") err.statusCode = 400;
+            next(err);
         }
-
-        // set them as cookie
-        res.cookie("refreshToken", refreshToken, refreshCookieOptions);
-        res.cookie("accessToken", accessToken, accessCookieOptions);
-
-        res.json({
-            status: "success",
-            user: new UserDto(user),
-            auth: true,
-        });
     }
 
     async logout(req, res, next) {

@@ -24,6 +24,10 @@ class RoomController {
             });
         } catch (err) {
             console.log("ROOM CONTROLLER | createRoom()--------------->", err);
+
+            if (err.name === "MongoServerError" && err.code === 11000)
+                err.statusCode = 400;
+
             next(err);
         }
     }
