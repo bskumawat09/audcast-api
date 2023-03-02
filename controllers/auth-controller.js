@@ -72,10 +72,6 @@ class AuthController {
             // check the OTP
             const [hashedOtp, expires] = hash.split(".");
 
-            if (Date.now() > +expires) {
-                throw new AppError("OTP has expired", 400);
-            }
-
             let data;
             if (phone) {
                 data = `${phone}.${otp}.${expires}`;
@@ -86,6 +82,11 @@ class AuthController {
             const isMatched = otpService.verifyOtp(hashedOtp, data);
             if (!isMatched) {
                 throw new AppError("invalid OTP", 400);
+            }
+
+            // if matched but expired
+            if (Date.now() > +expires) {
+                throw new AppError("OTP has expired", 400);
             }
 
             // after successfully verifying OTP, login the user or register new user
