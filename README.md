@@ -2,7 +2,11 @@
 
 > RESTful API for Real-time Audio Podcast platform using Socket.io and WebRTC.
 
-## API Collection
+## API Documentation
+
+https://documenter.getpostman.com/view/17116314/2s93CUGVHz
+
+## API Endpoints
 
 The application uses multiple Restful APIs to perform various actions. APIs working in this application are listed as follows:
 
