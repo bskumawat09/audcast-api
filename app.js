@@ -9,6 +9,7 @@ const connectDB = require("./config/database-config");
 const AppError = require("./utils/AppError");
 const errorHandler = require("./controllers/error-controller");
 const ACTIONS = require("./actions");
+const path = require("path");
 
 const app = express();
 
@@ -41,7 +42,13 @@ app.use("/storage", express.static("storage")); // for serving static files from
 app.use("/api", router);
 
 app.get("/api", (req, res) => {
-    res.send("Welcome to Audcast REST API");
+    res.status(200).json({
+        status: "success",
+    });
+});
+
+app.get("/", (req, res) => {
+    res.sendFile(path.join(__dirname, "/public/index.html"));
 });
 
 app.all("*", (req, res, next) => {
