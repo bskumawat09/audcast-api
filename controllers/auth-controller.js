@@ -4,16 +4,17 @@ const userService = require("../services/user-service");
 const tokenService = require("../services/token-service");
 const UserDto = require("../dtos/user-dto");
 const AppError = require("../utils/AppError");
+const { AppConfig } = require("../config/app-config");
 
 const refreshCookieOptions = {
-    maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
+    maxAge: AppConfig.REFRESH_COOKIE_MAX_AGE,
     httpOnly: true,
     sameSite: "none",
     secure: true,
 };
 
 const accessCookieOptions = {
-    maxAge: 30 * 60 * 1000, // 30 minutes
+    maxAge: AppConfig.ACCESS_COOKIE_MAX_AGE,
     httpOnly: true,
     sameSite: "none",
     secure: true,
@@ -30,7 +31,7 @@ class AuthController {
 
             // const otp = await otpService.generateOtp();
             const otp = 97979; // TODO: remove this hardcoded OTP in production
-            const validity = 10 * 60 * 1000; // 10 minutes
+            const validity = AppConfig.OTP_VALID_TILL; // 10 minutes
             const expires = Date.now() + validity; // curr_time + 10 minutes
 
             if (phone) {
