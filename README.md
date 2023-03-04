@@ -1,6 +1,6 @@
 # Audcast API
 
-> RESTful API for Real-time Audio Podcast platform using Socket.io and WebRTC.
+> REST API for Real-time Audio Podcast platform using Socket.io and WebRTC.
 
 ## API Documentation
 
@@ -69,7 +69,7 @@ You will know server is running by checking the output of the command `node app.
 
 ```bash
 Listening on port: 5000
-Database connected...
+Database connected
 ```
 
 ### Stopping API server

@@ -30,7 +30,7 @@ class AuthController {
             }
 
             // const otp = await otpService.generateOtp();
-            const otp = 97979; // TODO: remove this hardcoded OTP in production
+            const otp = 12345; // TODO: remove this hardcoded OTP in production
             const validity = AppConfig.OTP_VALID_TILL; // 10 minutes
             const expires = Date.now() + validity; // curr_time + 10 minutes
 
