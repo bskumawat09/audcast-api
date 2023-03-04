@@ -14,10 +14,20 @@ class RoomService {
         return room;
     }
 
-    async findRooms(filter) {
-        const rooms = await RoomModel.find(filter).populate("speakers").exec();
+    async findRooms(filter, page, limit) {
+        // const rooms = await RoomModel.find(filter).populate("speakers").exec();
+        const rooms = await RoomModel.find(filter)
+            .skip(page * limit)
+            .limit(limit)
+            .populate("speakers")
+            .exec();
 
         return rooms;
+    }
+
+    async countRooms(filter) {
+        const total = await RoomModel.countDocuments(filter);
+        return total;
     }
 
     async findOneRoom(filter) {
